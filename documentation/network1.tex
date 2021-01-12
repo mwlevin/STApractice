@@ -1,0 +1,541 @@
+
+\documentclass[12pt]{article}
+
+
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{verbatim}
+
+\usepackage[scr=boondoxo]{mathalfa}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\usepackage{pdfpages}
+
+\usepackage[round]{natbib}
+
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\tff}{t^{\mathrm{ff}}_{ij}}
+
+
+\usepackage[colorlinks=true]{hyperref}
+\hypersetup{%
+	urlcolor=blue,% hyperlink text will be green
+	linkcolor=black,
+	citecolor=black,
+	filecolor=black
+}
+
+
+\DeclareMathOperator*{\argmin}{\arg\min}
+
+
+
+\begin{document}
+	\allowdisplaybreaks[1]
+	
+	
+	\title{A tutorial for programming static traffic assignment in Java}
+	
+	\author{Michael W. Levin}
+	
+	\maketitle
+	
+\section{Introduction}
+
+The purpose of this tutorial is to guide you through learning the programming concepts necessary to implement the method of successive averages for solving user equilibrium. (For more information on user equilibrium, see \href{https://sboyles.github.io/blubook.html}{\textit{Transportation Network Analysis}}.)
+This tutorial consists of a series of programming exercises that increase in difficulty and required programming knowledge. After completing all exercises, you will have a working implementation of the method of successive averages. 
+To assist with these exercises, I have linked relevant programming tutorials and provided an autograde to check correctness. Some code is provided as a starting point. 
+This tutorial and the code is based on the Java programming language, which has potential for high-performance computing, is designed around object-oriented programming, and avoids low-level memory management.
+%
+%For your convenience, printed versions of all external tutorial pages referenced here have been included at the end of this document. 
+
+
+\subsection{Getting started}
+\label{sec11}
+
+The existing code is provided as a Netbeans project. Download and install \href{https://netbeans.apache.org/download/index.html}{Netbeans} and the \href{https://openjdk.java.net/projects/jdk/12/}{Java Development Kit}. Download a copy of this Git repository:
+
+\noindent \href{https://github.com/mwlevin/STApractice.git}{https://github.com/mwlevin/STApractice.git}. Alternatively, you can \href{https://netbeans.org/kb/docs/ide/git.html#clone}{clone it in Netbeans}.
+
+
+The repository contains a Netbeans project, which you may open directly in Netbeans. The \texttt{main()} method (which is executed when you run the program) is found in Main.java. Each of the exercises in this tutorial are contained within a separate file, e.g. Exercise1.java, Exercise2.java, etc. Each of these files has their own \texttt{main} method that can be executed. 
+In Main.java, you will find calls to these methods \href{https://www.w3schools.com/java/java_comments.asp}{commented out}, i.e. \texttt{Exercise1.main(args);}. Uncomment them to run each exercise. 
+These exercises are designed to be completed sequentially as they build on the code written previously. The autograde may not be able to check correctness if you complete them out of order. 
+
+\begin{center}
+\includegraphics[width=\textwidth]{netbeans1.png}
+\end{center}
+
+
+
+
+\subsection{Notation}
+
+This section defines the notation for the traffic assignment problem being solved. 
+For more details on the definition, see \href{https://sboyles.github.io/blubook.html}{\textit{Transportation Network Analysis}}. 
+Consider a network $\mathcal{G}=(\N,\A)$ with nodes $\N$ and links $\A\subseteq \N^2$.  Let $\Gamma^+_i\subseteq\A$ be the set of links outgoing from node $i$. The travel time $t_{ij}$ for link $(i,j)\in\A$ is a function of the flow on that link $x_{ij}$, and is given by the BPR function
+\begin{equation}
+	t_{ij}(x_{ij}) = \tff \left(1+\alpha_{ij} \left(\frac{x_{ij}}{C_{ij}}\right)^{\beta_{ij}}\right) \label{bpr}
+\end{equation}
+where $\tff$ is the free flow travel time, $C_{ij}$ is the link capacity, and $\alpha_{ij}$ and $\beta_{ij}$ are calibration constants.
+
+
+Let $\Z\subseteq\N$ be the set of zones. All trips start and end at zones. The demand from zone $r$ to zone $s$ is denoted as $d_{rs}$. A path $\pi$ consists of a set of links. Let $\Pi$ be the set of all paths, and let $\Pi_{rs}\subseteq\Pi$ be the set of paths from $r$ to $s$. Let $h^\pi$ be the flow on path $\pi$, and let $T^\pi$ be the travel time for path $\pi$. Let $\delta^\pi_{ij}\in\{0,1\}$ indicate whether path $\pi$ includes link $(i,j)$. Then $T^\pi$ can be written as
+\begin{equation}
+	T^\pi = \sum\limits_{(i,j)\in\A} \delta^\pi_{ij} t_{ij}(x_{ij})
+\end{equation}
+The user equilibrium problem is to find a path flow assignment $\mathbf{h}$ such that
+\begin{align}
+	h^\pi \left(T^\pi - \mu_{rs}\right) = 0
+\end{align}
+where $\mu_{rs}$ is the minimum travel time from $r$ to $s$. The solution can be found by solving the convex program
+\begin{subequations}
+\begin{align}
+	& \min && Z=\sum\limits_{(i,j)\in\A} \int\limits_{0}^{x_{ij}} t_{ij}(\omega) d\omega && \\
+	& \mathrm{s.t.} && x_{ij} = \sum\limits_{\pi \in \Pi} \delta^\pi_{ij} h^\pi && \forall (i,j)\in\A\\
+	& && d_{rs} = \sum\limits_{\pi\in\Pi_{rs}} h^\pi && \forall (r,s)\in\Z^2\\
+	& && h^\pi \geq 0 && \forall \pi\in\Pi 
+\end{align}
+\end{subequations}
+This tutorial will guide you through the steps needed to implement the method of successive averages algorithm for solving this problem.
+
+
+
+
+
+
+\section{Primitive data types, control logic, and arrays}
+
+\subsection{Calculating link travel times}
+\label{sec21}
+
+First, review \href{https://www.w3schools.com/java/java_syntax.asp}{Java syntax} and \href{https://www.w3schools.com/java/java_comments.asp}{comments}.
+Read the tutorials on \href{https://www.w3schools.com/java/java_variables.asp}{variables}, \href{https://www.w3schools.com/java/java_data_types.asp}{data types}, and \href{https://www.w3schools.com/java/java_math.asp}{type casting}. 
+Open Link.java in Netbeans. You will notice that the code first defines a \texttt{public class Link}, which is intended to represent one link $(i,j)\in\A$. Each $(i,j)$ should have a separate instance of the \texttt{Link} class. 
+We will learn later about creating and working with classes in Java. You will see some variables \texttt{x}, \texttt{t\_ff}, \texttt{C}, \texttt{alpha}, and \texttt{beta} defined here. For now, it is sufficient to know that these variables are available for use anywhere within the \texttt{Link} class. These variables correspond to the model variables $x_{ij}$, $t^{\mathrm{ff}}_{ij}$, $C_{ij}$, $\alpha_{ij}$, and $\beta_{ij}$ for the specific link $(i,j)$ being represented. 
+
+\begin{center}
+\includegraphics[width=\textwidth]{netbeans2.png}
+\end{center}
+
+
+\noindent Read the  tutorials on \href{https://www.w3schools.com/java/java_operators.asp}{operators} and the \href{https://www.w3schools.com/java/java_math.asp}{Math package}. Here is a \href{https://www.w3schools.com/java/java_ref_math.asp}{list of all Math methods}.
+	
+	
+\paragraph*{Exercise 1} Your first task is to implement the calculation of the link travel time $t_{ij}(x_{ij})$ using the BPR function of equation \eqref{bpr}. Assume that the values of $x_{ij}$, $\tff$, $C_{ij}$, $\alpha_{ij}$, and $\beta_{ij}$ are already given. Within the \texttt{Link} class, find the method \texttt{getTravelTime()}. It defines a \texttt{double} \texttt{t\_{ij}} and sets the value to 0. You need to calculate the correct value of $t_{ij}(x_{ij})$ and assign it to variable \texttt{t\_ij}. 
+	
+	\begin{center}
+		\includegraphics[width=0.3\textwidth]{netbeans3.png}
+	\end{center}
+
+\noindent Open Main.java and ensure that it will run \texttt{Exercise1.main(args);}.
+Open Exercise1.java. The \texttt{main()} method constructs two instances of the \texttt{Link} class with different parameters. The first link has $t^{\mathrm{ff}}_{1}=10$, $C_{1}=2580$, $\alpha_{1}=0.15$, and $\beta_{1}=4$. The second link $t^{\mathrm{ff}}_{2}=12$, $C_{2}=1900$, $\alpha_{2}=0.35$, and $\beta_{2}=2$. The \texttt{main()} method then prints the calculation of $t_{ij}$ with $x_{1}=1230.2$, $x_2=570$, $x_1=0$, and $x_2=2512$. You should compare the values calculated by your code with values that you have computed by hand. 
+Afterwards, \texttt{main} calls the \texttt{autograde()} method, which runs an automated test of your answers. 
+	
+	
+	\begin{center}
+	\includegraphics[width=0.5\textwidth]{netbeans4.png}
+\end{center}
+	
+Here is the expected output if the method is implemented correctly:
+
+
+	\begin{center}
+	\includegraphics[width=0.5\textwidth]{netbeans5.png}
+\end{center}	
+	
+	
+	\paragraph*{A note on testing.} The \texttt{autograde()} methods of each Exercise.java file are merely provided to check correctness. If your code is not correct, they will not indicate what the error is. This is to encourage good testing practice. In the \texttt{main()} method of each Exercise.java file, some code is provided which constructs \texttt{Link}s, \texttt{Node}s, or anything else relevant to the exercise. You can use this space to test the output of the methods you wrote for the exercise and compare it to what you calculate by hand to be the correct answer. Once you believe your code is correct, use the \texttt{autograde()} method to verify correctness.
+	
+	
+	
+\subsection{Iterating through links}
+\label{sec22}	
+	
+Read the tutorials on \href{https://www.w3schools.com/java/java_methods.asp}{defining methods} and \href{https://www.w3schools.com/java/java_methods_param.asp}{method parameters}.  When working with methods, it is important to be aware of the \href{https://www.w3schools.com/java/java_scope.asp}{scope of variables}. 
+	
+\paragraph*{Exercise 2(a)} Open Link.java. Implement the \texttt{getFlow()} and \texttt{getCapacity()} methods. \textit{Hint:} the link flow is $x_{ij}$ and the link capacity is $C_{ij}$. You already have variables for these values. It is good programming practice to separate the variables from other parts of the code through accessor methods. 
+
+\vspace{\baselineskip}
+
+\noindent
+Read the tutorials on \href{https://www.w3schools.com/java/java_booleans.asp}{booleans}. Then, read the tutorial on using \texttt{boolean} values to control the program flow through \href{https://www.w3schools.com/java/java_conditions.asp}{\texttt{if} and \texttt{else} statements}. You may also find it interesting to read about \href{https://www.w3schools.com/java/java_switch.asp}{\texttt{switch} logic}, but \texttt{switch} statements can also be accomplished by \texttt{if} and \texttt{else if} statements.
+
+Now we need to introduce the first data structure, arrays. An array is simply an ordered list of elements with a fixed size. Read the \href{https://www.w3schools.com/java/java_arrays.asp}{tutorial on arrays}. When working with arrays, it is helpful to use loops. Read the tutorials on \href{https://www.w3schools.com/java/java_while_loop.asp}{\texttt{while} loops}, \href{https://docs.oracle.com/javase/tutorial/java/nutsandbolts/while.html}{\texttt{for} loops}, and \href{https://www.w3schools.com/java/java_break.asp}{loop control}.
+
+\paragraph*{Exercise 2(b)} Open Exercise2.java. Your task is to implement the \texttt{findCongestedLinks()} method, which prints some information about each link.  The array of links is passed as a method parameter. For each link in the array, first print ``link'' and the link number, i.e. ``1'', ``2'', etc. Then print the link travel time, and finally print ``yes'' if $x_{ij}/C_{ij} >1$, or ``no'' if $x_{ij}/C_{ij} \leq 1$. Use \texttt{System.out.print()} and \texttt{System.out.println()} to print to the console.
+	Your output should look something like this:
+	\begin{align*}
+		& \texttt{link 1 10.171386840006189 yes} \\
+		&\texttt{link 2 7.69733539223671 no} \\
+		& \ldots
+	\end{align*}
+After completing Exercises 2(a) and 2(b), your code should pass the \texttt{autograde()} method of Exercise2.java. 
+	
+	
+	
+	
+\section{Object-oriented programming}
+
+\subsection{Network structure}
+
+\label{sec31}
+	
+You have already been working with the \texttt{Link} class to represent links in the network. It is time to learn enough about object-oriented programming to represent the entire network $\mathcal{G}$. Read the tutorials on \href{https://www.w3schools.com/java/java_oop.asp}{object-oriented programming},  \href{https://www.w3schools.com/java/java_classes.asp}{classes}, \href{https://www.w3schools.com/java/java_class_attributes.asp}{instance variables}, and \href{https://www.w3schools.com/java/java_class_methods.asp}{class methods}. You have already worked with the \texttt{getTravelTime()}, \texttt{getCapacity()}, and \texttt{getFlow()} methods of the \texttt{Link} class. Read the tutorial on \href{https://www.w3schools.com/java/java_modifiers.asp}{different types of class methods}.
+When a new instance of a class is created, the constructor method is automatically invoked. Read the tutorials on \href{https://www.w3schools.com/java/java_constructors.asp}{constructor methods}.
+ 
+ 
+ \paragraph*{Exercise 3(a)} Open Node.java. You will notice that a \texttt{Node} class has already been created for you.
+ Open Link.java. Implement the \texttt{getStart()} and \texttt{getEnd()} methods of the \texttt{Link} class, which return the start and end nodes. In terms of the model, link $(i,j)$ has start node $i$ and end node $j$. These are already stored as instance variables in the \texttt{Link} class. 
+ 
+ \vspace{\baselineskip}
+
+\noindent
+Open Link.java. You will notice that the first method is a constructor which stores the passed link parameters \texttt{start}, \texttt{end}, \texttt{t\_ff}, \texttt{C}, \texttt{alpha}, and \texttt{beta} in the instance variables. 
+
+\paragraph*{Exercise 3(b)} Implement the method \texttt{getId()} of the \texttt{Node} class. 
+The id is passed as a parameter into the constructor for the \texttt{Node class}. The constructor parameter is a single \texttt{int} representing the id of the node. Therefore, the constructor looks like \texttt{public Node(int id)}. 
+Also implement the constructor for the \texttt{Node} class. To do so, you may need to add instance variables to the \texttt{Node} class.
+
+
+\paragraph*{Exercise 3(c)}
+Text is represented as \texttt{String}s in Java. Read the tutorial on \href{https://www.w3schools.com/java/java_strings.asp}{\texttt{String}s}. 
+When you print an instance of a class, it will by default call the \texttt{toString()} method of that class. Unless you implement it, the output will be a memory reference that is usually not useful. Implement the \texttt{toString()} methods of the \texttt{Node} class to return the id of the node. Also implement the \texttt{toString()} method of the \texttt{Link} class to return ``($i$, $j$)'' where $i$ and $j$ are the ids of the start and end nodes. For instance, a link from node 1 to node 2 should have a \texttt{toString()} output of ``\texttt{(1, 2)}''. 
+% 
+
+ \vspace{\baselineskip}
+
+\noindent
+It is now helpful for us to learn about dynamic arrays. Read the tutorial on the \href{https://www.w3schools.com/java/java_arraylist.asp}{Java \texttt{ArrayList} library}. Later on, we will need to obtain $\Gamma^+_i$: the set of links starting at $i$. This is defined as the \texttt{getOutgoing()} method of the \texttt{Node} class, which returns an \texttt{ArrayList} of all outgoing \texttt{Link}s.
+
+\paragraph*{Exercise 3(d)} Implement the \texttt{getOutgoing()} method of the \texttt{Node} class. \textit{Hint:} you will need to create a new instance variable \texttt{ArrayList} in the \texttt{Node} class to store $\Gamma^+_i$. You will need to instantiate this new \texttt{ArrayList} --- do so in the constructor of the \texttt{Node} class.
+Create a new method in the \texttt{Node} class to add \texttt{Link}s to this \texttt{ArrayList}. Then call this method in the constructor of the \texttt{Link} class. The keyword \href{https://www.w3schools.com/java/ref_keyword_this.asp}{\texttt{this}}, which refers to the current instance of a class, is useful here. 
+
+ \vspace{\baselineskip}
+
+\noindent
+After completing Exercises 3(a)--3(d), your code should pass the \texttt{autograde()} method of Exercise3.java. 
+
+
+
+% exercise 4: Zone class that stores demand
+
+\subsection{Inheritance}
+\label{sec32}
+
+Our next step is to create a representation of the demand $d_{rs}$. To do so, we will create a new \texttt{Zone} class that is a special type of \texttt{Node}: the \texttt{Zone} $r$ stores the demand $d_{rs}$. Read the tutorials on \href{https://www.w3schools.com/java/java_inheritance.asp}{inheritance} and \href{https://www.w3schools.com/java/java_polymorphism.asp}{polymorphism}. Open Zone.java. 
+The \texttt{Zone} class extends the \texttt{Node} class. 
+For the next exercise, we will be implementing the \texttt{getDemand(Node)} method of the \texttt{Zone} class, which returns the demand $d_{rs}$ from node $r$ (the \texttt{Zone} being referenced) to a destination node. 
+Demand is added via the \texttt{addDemand(Node, double)} method. 
+To assist in this implementation, learn about \href{https://www.w3schools.com/java/java_hashmap.asp}{\texttt{HashMap}s}. The \texttt{hashCode} method, which is needed to use \texttt{Node}s as a key for \texttt{HashMap}s, has already been implemented for you.  
+	
+	
+\paragraph*{Exercise 4(a)} Open Zone.java. Implement the constructor of the \texttt{Zone} class. You can call methods of the parent class using the \href{https://www.w3schools.com/java/ref_keyword_super.asp}{\texttt{super}} keyword.
+
+\paragraph*{Exercise 4(b)} Implement the \texttt{addDemand(Node, double)} method of the \texttt{Zone} class. This method must store the demand added for later reference by the \texttt{getDemand(Node)} method. Implement the \texttt{getDemand(Node)} method. \textit{Hint: } Create a \texttt{HashMap} instance variable in the \texttt{Zone} class to store demand. Instantiate this \texttt{HashMap} in the constructor of the \texttt{Zone} class. 
+
+\paragraph*{Exercise 4(c)} The productions of a zone $P_r$ is defined as $P_r=\sum\limits_{s\in\Z}d_{rs}$. Implement the \texttt{getProductions()} method of the \texttt{Zone} class. \textit{Hint:} Iterate through all stored demand.
+
+
+\paragraph*{Exercise 4(d)} Some zones are not through nodes, meaning that they can be used as destinations but not as intermediate nodes for travel. The \texttt{boolean} method \texttt{isThruNode()} of class \texttt{Node} indicates whether a \texttt{Node} is a through node. In the \texttt{Node} class, the method always returns \texttt{true}. Some \texttt{Zone}s may return \texttt{false}. Read the tutorial on \href{https://www.w3schools.com/java/java_methods_overloading.asp}{method overloading}. Implement methods \texttt{setThruNode(boolean)} and \texttt{isThruNode()} of the \texttt{Zone} class. \texttt{Zone}s are through nodes by default, but that parameter can be changed by calling \texttt{setThruNode(false)}.
+
+
+
+ \vspace{\baselineskip}
+
+\noindent
+After completing Exercises 4(a)--4(d), your code should pass the \texttt{autograde()} method of Exercise4.java. 
+% add through node to Node
+
+
+
+
+% exercise 5: read network
+
+\subsection{Reading network from files}
+\label{sec33}
+
+
+Open Network.java. It contains the \texttt{Network} class, which has been partially implemented for you. There are instance variable arrays of \texttt{Node}s, \texttt{Link}s, and \texttt{Zone}s, which represent the sets $\N$, $\A$, and $\Z$ of the network. There are also accessor methods for each of these arrays. These arrays need to be instantiated to the correct size. 
+
+The next step is to populate these sets with network data. Thus far, we have been creating specific instances of \texttt{Node}s and \texttt{Link}s in the Exercise.java files. To keep our code general, we want to keep the problem-specific data in data files rather than in the code. Fortunately, data for many networks is available on \href{https://github.com/bstabler/TransportationNetworks}{Ben Stabler's Github account}. 
+
+
+Before we discuss the data format, we need to learn how to read from a file. Read the tutorial on  \href{https://www.w3schools.com/java/java_user_input.asp}{the \texttt{Scanner} class}, which is an effective way of reading different data from a file in text format. We need to direct the \texttt{Scanner} to use a file as an input source. Read the tutorials on the \href{https://www.w3schools.com/java/java_files.asp}{\texttt{File} class} and \href{https://www.w3schools.com/java/java_files_read.asp}{reading from a file}. 
+
+In this project, the network data is contained within the folder ``data/[network name]/''. Each network is specified by two text files, ``net.txt'' and ``trips.txt''.  The constructor \texttt{Network(String)} constructs the \texttt{Network} by creating the appropriate \texttt{File} references and calling the \texttt{readNetwork(File)} and \texttt{readTrips(File)} methods for the given network name. 
+%
+The first file, ``net.txt'', defines the links and their characteristics. An example is shown below:
+
+\begin{center}
+	\includegraphics[width=\textwidth]{netbeans6.png}
+\end{center}
+
+
+\noindent The first section contain the metadata, which specifies the size of the sets $\N$, $\A$, and $\Z$. This section is ended by the line \texttt{<END OF METADATA>}. 
+
+
+
+
+\paragraph*{Exercise 5(a)} Read the metadata to instantiate the instance variables \texttt{nodes}, \texttt{links}, and \texttt{zones} of the \texttt{Network} class with the correct size. \textit{Hint:} loop until the line \texttt{<END OF METADATA>} is reached. If an intermediate line contains the text \texttt{<NUMBER OF NODES>}, then use that number to instantiate the \texttt{nodes} array. Repeat for the \texttt{links} and \texttt{zones}. The \href{https://www.w3schools.com/java/java_ref_string.asp}{\texttt{String} methods} \texttt{substring()}, \texttt{indexOf()}, and \texttt{trim()} are useful here. Use the method \texttt{Integer.parseInt(String)} to convert a \texttt{String} representing a number into an \texttt{int}. 
+
+\vspace{\baselineskip}
+
+\paragraph*{Exercise 5(b)} \noindent Zones are labeled $1$ through $\vert \Z \vert$. Construct these in the  \texttt{readNetwork(File)} method of the \texttt{Network} class and store them in the array \texttt{zones}. \textit{Hint:} the number of nodes in the metadata specifies the number of zones to construct.
+Nodes are labeled $1$ through $\vert \N \vert$. You can similarly construct them now, but notice that the first $\vert \Z \vert$ nodes are also zones. Do not construct new instances of \texttt{Node} for these zones; use the instance of \texttt{Zone} that already exists. 
+
+\paragraph*{Exercise 5(c)} After the header line, each line of data contains the parameters for one link in a specific order: start node, end node, capacity, length, free flow time, $\alpha$, $\beta$, speed limit, toll, and type. Some of these are not used in this tutorial. In the \texttt{readNetwork()} method of the \texttt{Network} class, read the data using \texttt{Scanner} methods to construct a \texttt{Link} instance for each link, and store it in the array \texttt{links}. \textit{Hint:} the number of links in the metadata specifies the number of lines of data. 
+
+
+\vspace{\baselineskip}
+
+\noindent
+The second file is ``trips.txt''. The metadata here can be ignored. For each zone $r$, the keyword \texttt{Origin} defines the start of the demand array $d_{rs}$ for each zone $s$. That demand is specified over the next several lines.
+
+\begin{center}
+	\includegraphics[width=\textwidth]{netbeans7.png}
+\end{center}
+
+\paragraph*{Exercise 5(d)} In the \texttt{readTrips(File)} method, read the origin-destination trip matrix, and store it in the \texttt{Zone} instances using the \texttt{addDemand(Node, double)} method of class \texttt{Zone}. \textit{Hint:} Scan to the end of the metadata using a \texttt{while} loop until you reach the text \texttt{<END OF METADATA>}. Scan for origins the \texttt{Origin} keyword. Then scan for destinations as integers until you reach the next \texttt{Origin} keyword. Use \texttt{Scanner.next()} instead of looking for new lines. 
+
+
+\paragraph*{Exercise 5(e)} For testing or data analysis, you may find it helpful to find the \texttt{Node} associated with a given id, or the \texttt{Link} between two \texttt{Node}s. Implement the \texttt{findNode(int)} and \texttt{findLink(Node, Node)} methods of the \texttt{Network} class. \textit{Hint:} You have an array of all \texttt{Node}s available in the \texttt{Network} class, and a list of all outgoing links from a given \texttt{Node}. 
+
+
+ \vspace{\baselineskip}
+
+
+\noindent
+After completing Exercises 5(a)--5(e), your code should pass the \texttt{autograde()} method of Exercise5.java. 
+
+
+
+
+\section{Data structures and algorithms}
+
+
+\subsection{Dijkstra's algorithm}
+
+
+We are now ready to implement a shortest path algorithm, which will be used in the method of successive averages. We will implement the well-known Dijkstra's algorithm, which finds the one-to-all shortest path. For more information on Dijkstra's, see \href{https://sboyles.github.io/blubook.html}{\textit{Transportation Network Analysis}}. We need to define two additional variables. Let $c_n\in\mathbb{R}_+$ be the cost label of node $n$, and let $p_n\in\N$ be the predecessor node. First, read through a pseudocode of this algorithm:
+
+
+\vspace{\baselineskip}
+
+
+\begin{algorithmic}[1]
+	\Procedure{Dijkstra's}{$r$} 
+	\For{$n\in \N$} \Comment{Initialization} \label{line1}
+	\State $c_n \leftarrow \infty$
+	\State $p_n \leftarrow \emptyset$
+	\EndFor
+	\State $c_r \leftarrow 0$ \label{line6}
+	\State  $Q\leftarrow \{r\}$ \label{line7}
+	
+	\vspace{0.5\baselineskip}
+	
+	\While{$Q\neq\emptyset$} \Comment{Main loop} \label{line8}
+	\State $u\leftarrow \argmin\limits_{n\in Q} \left\{ c_n\right\}$ \label{line9}
+	\For{$(u,v)\in\A$} \label{line10}
+	\If{$c_u+t_{uv} < c_v$} \Comment{Is this a shorter path to $v$?} \label{line11}
+	\State $c_v \leftarrow c_u + t_{uv}$ \Comment{If so, update $v$ and add it to $Q$} \label{line12}
+	\State $p_v \leftarrow u$
+	\State $Q\leftarrow Q\cup \{v\}$ \label{line14}
+	\EndIf
+	\EndFor
+	\EndWhile \label{line17}
+	\EndProcedure 
+	
+\end{algorithmic}
+
+\vspace{\baselineskip}
+
+\noindent This may be your first time implementing pseudocode, so we will break it down into steps. The first is the initialization. In line \ref{line1}, we start looping through all nodes in set $\N$. Within this loop, set $c_n \leftarrow \infty$. The operator $\leftarrow$ is used to indicate that $c_n$ is assigned the value $\infty$. $p_n$ is assigned the value $\emptyset$, or \texttt{null} in Java, i.e. $p_n$ is initialized to not be any specific node. After the loop, in line \ref{line6} we set $c_r\leftarrow 0$. Recall that $r$ is the origin parameter to Dijkstra's, so $r$ is the starting point. Therefore the shortest path from $r$ to $r$ has cost $0$. Finally, in line \ref{line7} we construct the set $Q\subseteq\N$ which contains the unsettled nodes. 
+
+Next, we enter the main loop in line \ref{line8}. This loop continues while $Q$ is non-empty. Line \ref{line9} is written very simply, but can actually require more extensive code. Finding the $\argmin\limits_{n\in Q} \left\{c_n\right\}$ could involve looping through all elements of $Q$ to find the $n$ with the smallest value of $c_n$. Save that node and store it in variable $u$. Once you have determined $u$, loop through all outgoing links $(u,v)$ in line \ref{line10}. The method \texttt{getOutgoing()} of the \texttt{Node} class which you implemented previously will be useful here. In line \ref{line11}, notice that while $c_u$ and $c_v$ are variables, $t_{uv}$ is a method call to \texttt{getTravelTime()} of the \texttt{Link} class. Line \ref{line14} requires adding node $u$ to set $Q$. Beware of adding multiple copies of $u$ to your implementation of $Q$, which is possible with some data structures (such as the \texttt{ArrayList}). If done correctly, $Q$ will eventually become empty, and the algorithm will terminate after calculating $c_n$ and $p_n$ for all nodes. 
+
+
+
+
+
+
+We will start our implementation of Dijkstra's by implementing a data structure to store a path. 
+A \texttt{Path} is an ordered list of \texttt{Link}s. To provide practice with abstraction, I have defined a \texttt{Path} class in Path.java. A \texttt{Path} extends an \texttt{ArrayList<Link>}, which \href{https://www.w3schools.com/java/java_inheritance.asp}{inherits} the \texttt{get()}, \texttt{size()}, and \texttt{add()} methods of \texttt{ArrayList}. In addition, \texttt{Path} defines five additional methods. \texttt{isConnected()} checks whether the list of links is a valid path. For instance, the list \texttt{[(1,3), (3, 7), (7, 8)]} is a connected path, but the list \texttt{[(1,3), (2, 4), (4, 8)]} is not. \texttt{getSource()} and \texttt{getDest()} return the start and end nodes of the path.
+\texttt{getTravelTime()} calculates $T^\pi$. The last method, \texttt{addHstar(double)}, will be used later.
+
+
+\paragraph*{Exercise 6(a)} Open Path.java. Implement the \texttt{getSource()}, \texttt{getDest()}, \texttt{isConnected()}, and \texttt{getTravelTime()}  methods of the \texttt{Path} class.
+
+
+\vspace{\baselineskip}
+
+\noindent
+To implement Dijkstra's, we need two additional variables $c_n$ and $p_n$. These are available as the instance variables \texttt{cost} and \texttt{predecessor} of the \texttt{Node} class. Notice that unlike other instance variables, these have been declared using the \texttt{protected} keyword. Consequently, these variables can be accessed and modified directly from other classes without going through methods. 
+
+% 6b dijkstra's initialization
+
+\paragraph*{Exercise 6(b)} Open Network.java and navigate to the \texttt{dijkstras(Node)} method. Implement the initialization (lines \ref{line1}--\ref{line7}) of Dijkstra's algorithm. Use \texttt{Double.MAX\_VALUE} in lieu of $\infty$. 
+It may be convenient to use a \href{https://www.w3schools.com/java/java_hashset.asp}{\texttt{HashSet}} to implement $Q$. You may wish to test the correctness of the initialization before proceeding further. 
+
+
+% 6c dijkstra's main loop
+\paragraph*{Exercise 6(c)} In Network.java, implement the main loop of Dijkstra's algorithm (lines \ref{line8}--\ref{line17}) in the \texttt{dijkstras(Node)} method. 
+
+\vspace{\baselineskip}
+
+\noindent
+After executing Dijkstra's algorithm, we now have all the information needed to find the shortest path from $r$ to $s$ through the predecessor labels. We need to convert those predecessor labels into an instance of the \texttt{Path} class created earlier. This can be accomplished through the trace algorithmic shown below. Essentially, start at $s$, and follow the predecessor labels until reaching $r$, adding each link to the path as you go. 
+
+\vspace{\baselineskip}
+
+\begin{algorithmic}[1]
+	\Procedure{trace}{$r, s$}
+	\State $n\leftarrow s$
+	\State $\pi \leftarrow \emptyset$
+	
+	\vspace{0.5\baselineskip}
+	
+	\While{$n\neq r$}
+	\State $\pi\leftarrow \pi \cup (p_n,n)$
+	\State $n\leftarrow p_n$
+	\EndWhile
+	\EndProcedure
+\end{algorithmic}
+
+%\vspace{\baselineskip}
+
+\paragraph*{Exercise 6(d)} Implement the \texttt{trace(Node, Node)} method in the \texttt{Network} class. 
+Remember to add the links in the correct order to ensure a connected path, which can be checked afterwards by the \texttt{isConnected()} method of the \texttt{Path} class.
+
+ \vspace{\baselineskip}
+
+
+\noindent
+After completing Exercises 6(a)--6(d), your code should pass the \texttt{autograde()} method of Exercise6.java. 
+
+
+\subsection{Network statistics}
+
+Before implementing the method of successive averages, there are some network statistics that will be used in the implementation. These are the total system travel time, $TSTT$, the shortest path travel time, $SPTT$, and the average excess cost, $AEC$. These are defined mathematically as follows:
+\begin{align}
+	TSTT &= \sum\limits_{(i,j)\in\A} x_{ij} t_{ij}(x_{ij})\\
+	SPTT &= \sum\limits_{(r,s)\in\Z^2} \mu_{rs} d_{rs}\\
+	AEC &= \frac{TSTT- SPTT}{\sum\limits_{(r,s)\in\Z^2} d_{rs}}
+\end{align}
+
+\paragraph*{Exercise 7} Implement the \texttt{getTSTT()}, \texttt{getSPTT()}, \texttt{getTotalTrips()}, and \texttt{getAEC()} methods of the \texttt{Network} class. After completing them, your code should pass the \texttt{autograde()} method of Exercise7.java. 
+
+
+
+\subsection{Method of successive averages}
+
+
+The method of successive averages is a simple algorithm for solving user equilibrium. Each iteration, it constructs an all-or-nothing flow assignment $\mathbf{x}^\star$ formed by assigning all flow from $r$ to $s$ to the shortest path from $r$ to $s$. Then, it takes a weighted average between the current and the all-or-nothing flow assignment. The weight, or step size, is denoted by $\lambda$. 
+This step is repeated until the maximum number of iterations, $I$, is reached. We can track the convergence towards user equilibrium by printing the average excess cost each iteration.
+The algorithm is specified below in pseudocode:
+
+\vspace{\baselineskip}
+
+\begin{algorithmic}[1]
+	\Procedure{Method of successive averages}{$I$}
+	\For{$(i,j)\in\A$} \Comment{Initialization}
+	\State $x^\star_{ij} \leftarrow 0$
+	\EndFor
+	
+	\vspace{0.5\baselineskip}
+	
+	\For{$iteration\leftarrow 1$ to $I$} \label{msa5}
+	\For{$r\in\Z$}  \label{msa6}
+	\State {\sc Dijkstra's}($r$) \Comment{Find shortest paths from $r$ to $s$}
+	\For{$s\in\Z$}
+	\State $\pi^\star_{rs} \leftarrow$ {\sc trace($r$, $s$)}
+	\For{$(i,j)\in\pi^\star_{rs}$} \Comment{Update all-or-nothing flow assignment}
+	\State $x^\star_{ij} \leftarrow x^\star_{ij} + d_{rs}$ \label{msa11}
+	\EndFor
+	\EndFor
+	\EndFor \label{msa14}
+	
+	\vspace{0.5\baselineskip}
+	
+	
+	\State $\lambda \leftarrow \frac{1}{iteration}$ \Comment{Calculate step size} \label{msa15}
+	
+	\vspace{0.5\baselineskip}
+	
+	\For{$(i,j)\in\A$} \Comment{Take weighted average between $\mathbf{x}$ and $\mathbf{x}^\star$} \label{msa16}
+	\State $x_{ij} \leftarrow (1-\lambda)x_{ij} + \lambda x^\star_{ij}$ \label{msa17}
+	\State $x^\star_{ij}\leftarrow 0$ \label{msa18}
+	\EndFor
+	
+	\vspace{0.5\baselineskip}
+	
+	\State {\sc Print}($AEC$) \Comment{Track convergence}
+	
+	\EndFor
+	\EndProcedure
+\end{algorithmic}
+
+% x star variable, addxstar method, and addFlow() method
+
+\paragraph*{Exercise 8(a)} In the \texttt{Link} class, implement the \texttt{addXstar(double)} method which is used to implement line \ref{msa11}. 
+The $x^\star_{ij}$ value will need to be stored in a new instance variable in the \texttt{Link} class.
+In the \texttt{Path} class, implement the \texttt{addHstar(double)} which adds the specified flow to the $x^\star_{ij}$ variable of every link in the path.
+
+
+
+\paragraph*{Exercise 8(b)} In the \texttt{Network} class, implement the \texttt{calculateStepsize(int)} method, which determines the value of $\lambda$ in line \ref{msa15}. Using this $\lambda$, in the \texttt{Link} class implement the \texttt{calculateNewX(double)} method, which takes as input $\lambda$ and implements lines \ref{msa17} and \ref{msa18}. 
+Finally, implement the \texttt{calculateNewX(double)} method of the \texttt{Network} class, which implements the loop in line \ref{msa16}. 
+
+
+
+\paragraph*{Exercise 8(c)} Implement the \texttt{calculateAON()} method in the \texttt{Network} class, which implements the loop in lines \ref{msa6}--\ref{msa14}. 
+
+\paragraph*{Exercise 8(d)} In the method \texttt{msa(int)} of the \texttt{Network} class, implement the main loop (line \ref{msa5} of the method of successive averages. Most of the work is already done through the previous exercises. Each iteration, print out the iteration number and the average excess cost, as shown below:
+
+\begin{center}
+	\includegraphics[width=0.3\textwidth]{netbeans8.png}
+\end{center}
+
+
+% calculate step size and update(step size)
+
+
+% calculate AON
+
+
+% MSA
+
+
+	
+
+	
+	\noindent
+	After completing Exercises 8(a)--8(d), your code should pass the \texttt{autograde()} method of Exercise8.java. 
+	
+	
+	
+	
+	
+	\section{Next steps}
+	
+	This is not the most efficient implementation of the method of successive averages. Now that you have a correct implementation, you may want to go back and improve the computational efficiency. In addition, the method of successive averages is far from the most efficient algorithm. The Frank-Wolfe algorithm can be implemented in this code fairly easily. You may also wish to try implementing gradient projection~\citep{jayakrishnan1994faster} or Algorithm B~\citep{dial2006path}.
+	
+	
+	
+	
+	
+	
+	\bibliography{MWL}
+	\bibliographystyle{abbrvnat}
+	
+	
+	
+\end{document}
