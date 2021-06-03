@@ -280,19 +280,19 @@ The first file, ``net.txt'', defines the links and their characteristics. An exa
 \end{center}
 
 
-\noindent The first section contain the metadata, which specifies the size of the sets $\N$, $\A$, and $\Z$. This section is ended by the line \texttt{<END OF METADATA>}. 
+\noindent The first section contains the metadata, which specifies the size of the sets $\N$, $\A$, and $\Z$. This section is ended by the line \texttt{<END OF METADATA>}. Nodes are labeled by the numbers $1\ldots \vert\N\vert$ where $\vert\N\vert$ is specified in the metadata. 
 
 
 
 
-\paragraph*{Exercise 5(a)} Read the metadata to instantiate the instance variables \texttt{nodes}, \texttt{links}, and \texttt{zones} of the \texttt{Network} class with the correct size. \textit{Hint:} loop until the line \texttt{<END OF METADATA>} is reached. If an intermediate line contains the text \texttt{<NUMBER OF NODES>}, then use that number to instantiate the \texttt{nodes} array. Repeat for the \texttt{links} and \texttt{zones}. The \href{https://www.w3schools.com/java/java_ref_string.asp}{\texttt{String} methods} \texttt{substring()}, \texttt{indexOf()}, and \texttt{trim()} are useful here. Use the method \texttt{Integer.parseInt(String)} to convert a \texttt{String} representing a number into an \texttt{int}. 
+\paragraph*{Exercise 5(a)} Read the metadata to instantiate the instance variables \texttt{nodes}, \texttt{links}, and \texttt{zones} of the \texttt{Network} class with the correct size. \textit{Hint:} loop until the line \texttt{<END OF METADATA>} is reached. If an intermediate line contains the text \texttt{<NUMBER OF NODES>}, then use that number to instantiate the \texttt{nodes} array. Repeat for the \texttt{links} and \texttt{zones}. The \href{https://www.w3schools.com/java/java_ref_string.asp}{\texttt{String} methods} \texttt{substring()}, \texttt{indexOf()}, and \texttt{trim()} are useful here. Use the method \texttt{Integer.parseInt(String)} to convert a \texttt{String} representing a number into an \texttt{int}. The equivalent method for \texttt{double}s is \texttt{Double.parseDouble(String)}.
 
 \vspace{\baselineskip}
 
 \paragraph*{Exercise 5(b)} \noindent Zones are labeled $1$ through $\vert \Z \vert$. Construct these in the  \texttt{readNetwork(File)} method of the \texttt{Network} class and store them in the array \texttt{zones}. \textit{Hint:} the number of nodes in the metadata specifies the number of zones to construct.
 Nodes are labeled $1$ through $\vert \N \vert$. You can similarly construct them now, but notice that the first $\vert \Z \vert$ nodes are also zones. Do not construct new instances of \texttt{Node} for these zones; use the instance of \texttt{Zone} that already exists. 
 
-\paragraph*{Exercise 5(c)} After the header line, each line of data contains the parameters for one link in a specific order: start node, end node, capacity, length, free flow time, $\alpha$, $\beta$, speed limit, toll, and type. Some of these are not used in this tutorial. In the \texttt{readNetwork()} method of the \texttt{Network} class, read the data using \texttt{Scanner} methods to construct a \texttt{Link} instance for each link, and store it in the array \texttt{links}. \textit{Hint:} the number of links in the metadata specifies the number of lines of data. 
+\paragraph*{Exercise 5(c)} After the header line, each line of data contains the parameters for one link in a specific order: start node, end node, capacity, length, free flow time, $\alpha_{ij}$, $\beta_{ij}$, speed limit, toll, and type. ``B'' refers to $\alpha_{ij}$ and ``power'' refers to $\beta_{ij}$. Some of these are not used in this tutorial. In the \texttt{readNetwork()} method of the \texttt{Network} class, read the data using \texttt{Scanner} methods to construct a \texttt{Link} instance for each link, and store it in the array \texttt{links}. \textit{Hint:} the number of links in the metadata specifies the number of lines of data. 
 
 
 \vspace{\baselineskip}
@@ -344,6 +344,7 @@ We are now ready to implement a shortest path algorithm, which will be used in t
 	
 	\While{$Q\neq\emptyset$} \Comment{Main loop} \label{line8}
 	\State $u\leftarrow \argmin\limits_{n\in Q} \left\{ c_n\right\}$ \label{line9}
+	\State $Q\leftarrow Q/\{u\}$
 	\For{$(u,v)\in\A$} \label{line10}
 	\If{$c_u+t_{uv} < c_v$} \Comment{Is this a shorter path to $v$?} \label{line11}
 	\State $c_v \leftarrow c_u + t_{uv}$ \Comment{If so, update $v$ and add it to $Q$} \label{line12}
@@ -360,7 +361,7 @@ We are now ready to implement a shortest path algorithm, which will be used in t
 
 \noindent This may be your first time implementing pseudocode, so we will break it down into steps. The first is the initialization. In line \ref{line1}, we start looping through all nodes in set $\N$. Within this loop, set $c_n \leftarrow \infty$. The operator $\leftarrow$ is used to indicate that $c_n$ is assigned the value $\infty$. $p_n$ is assigned the value $\emptyset$, or \texttt{null} in Java, i.e. $p_n$ is initialized to not be any specific node. After the loop, in line \ref{line6} we set $c_r\leftarrow 0$. Recall that $r$ is the origin parameter to Dijkstra's, so $r$ is the starting point. Therefore the shortest path from $r$ to $r$ has cost $0$. Finally, in line \ref{line7} we construct the set $Q\subseteq\N$ which contains the unsettled nodes. 
 
-Next, we enter the main loop in line \ref{line8}. This loop continues while $Q$ is non-empty. Line \ref{line9} is written very simply, but can actually require more extensive code. Finding the $\argmin\limits_{n\in Q} \left\{c_n\right\}$ could involve looping through all elements of $Q$ to find the $n$ with the smallest value of $c_n$. Save that node and store it in variable $u$. Once you have determined $u$, loop through all outgoing links $(u,v)$ in line \ref{line10}. The method \texttt{getOutgoing()} of the \texttt{Node} class which you implemented previously will be useful here. In line \ref{line11}, notice that while $c_u$ and $c_v$ are variables, $t_{uv}$ is a method call to \texttt{getTravelTime()} of the \texttt{Link} class. Line \ref{line14} requires adding node $u$ to set $Q$. Beware of adding multiple copies of $u$ to your implementation of $Q$, which is possible with some data structures (such as the \texttt{ArrayList}). If done correctly, $Q$ will eventually become empty, and the algorithm will terminate after calculating $c_n$ and $p_n$ for all nodes. 
+Next, we enter the main loop in line \ref{line8}. This loop continues while $Q$ is non-empty. Line \ref{line9} is written very simply, but can actually require more extensive code. Finding the $\argmin_{n\in Q} \left\{c_n\right\}$ could involve looping through all elements of $Q$ to find the $n$ with the smallest value of $c_n$. Save that node and store it in variable $u$. Once you have determined $u$, remove it from $Q$. Then loop through all outgoing links $(u,v)$ in line \ref{line10}. The method \texttt{getOutgoing()} of the \texttt{Node} class which you implemented previously will be useful here. In line \ref{line11}, notice that while $c_u$ and $c_v$ are variables, $t_{uv}$ is a method call to \texttt{getTravelTime()} of the \texttt{Link} class. Line \ref{line14} requires adding node $u$ to set $Q$. Beware of adding multiple copies of $u$ to your implementation of $Q$, which is possible with some data structures (such as the \texttt{ArrayList}). If done correctly, $Q$ will eventually become empty, and the algorithm will terminate after calculating $c_n$ and $p_n$ for all nodes. 
 
 
 
@@ -378,7 +379,7 @@ A \texttt{Path} is an ordered list of \texttt{Link}s. To provide practice with a
 \vspace{\baselineskip}
 
 \noindent
-To implement Dijkstra's, we need two additional variables $c_n$ and $p_n$. These are available as the instance variables \texttt{cost} and \texttt{predecessor} of the \texttt{Node} class. Notice that unlike other instance variables, these have been declared using the \texttt{protected} keyword. Consequently, these variables can be accessed and modified directly from other classes without going through methods. 
+To implement Dijkstra's, we need two additional variables $c_n$ and $p_n$. These are available as the instance variables \texttt{cost} and \texttt{predecessor} of the \texttt{Node} class. Notice that unlike other instance variables, these have been declared using the \texttt{protected} keyword. Consequently, these variables can be accessed and modified directly from other classes without going through methods. Review the different types of \href{https://www.w3schools.com/java/java_modifiers.asp}{access modifiers}.
 
 % 6b dijkstra's initialization
 
