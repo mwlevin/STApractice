@@ -1,5 +1,5 @@
 
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 
 
 \usepackage{fullpage}
@@ -66,8 +66,12 @@ The existing code is provided as a Netbeans project. Download and install \href{
 \noindent \href{https://github.com/mwlevin/STApractice.git}{https://github.com/mwlevin/STApractice.git}. Alternatively, you can \href{https://netbeans.org/kb/docs/ide/git.html#clone}{clone it in Netbeans}.
 
 
-The repository contains a Netbeans project, which you may open directly in Netbeans. The \texttt{main()} method (which is executed when you run the program) is found in Main.java. Each of the exercises in this tutorial are contained within a separate file, e.g. Exercise1.java, Exercise2.java, etc. Each of these files has their own \texttt{main} method that can be executed. 
-In Main.java, you will find calls to these methods \href{https://www.w3schools.com/java/java_comments.asp}{commented out}, i.e. \texttt{Exercise1.main(args);}. Uncomment them to run each exercise. 
+
+
+
+The repository contains a Netbeans project, which you may open directly in Netbeans. 
+The \texttt{main()} method (which is executed when you run the program) is found in Main.java. Each of the exercises in this tutorial are contained within a separate file, e.g. Exercise1.java, Exercise2.java, etc. Each of these files has their own \texttt{main} method that can be executed. 
+In Main.java, you will find calls to these methods \href{https://www.w3schools.com/java/java_comments.asp}{commented out}, i.e. \texttt{Exercise1.test();}. Uncomment them to run each exercise. 
 These exercises are designed to be completed sequentially as they build on the code written previously. The autograde may not be able to check correctness if you complete them out of order. 
 
 \begin{center}
@@ -130,15 +134,17 @@ We will learn later about creating and working with classes in Java. You will se
 \noindent Read the  tutorials on \href{https://www.w3schools.com/java/java_operators.asp}{operators} and the \href{https://www.w3schools.com/java/java_math.asp}{Math package}. Here is a \href{https://www.w3schools.com/java/java_ref_math.asp}{list of all Math methods}.
 	
 	
-\paragraph*{Exercise 1} Your first task is to implement the calculation of the link travel time $t_{ij}(x_{ij})$ using the BPR function of equation \eqref{bpr}. Assume that the values of $x_{ij}$, $\tff$, $C_{ij}$, $\alpha_{ij}$, and $\beta_{ij}$ are already given. Within the \texttt{Link} class, find the method \texttt{getTravelTime()}. It defines a \texttt{double} \texttt{t\_{ij}} and sets the value to 0. You need to calculate the correct value of $t_{ij}(x_{ij})$ and assign it to variable \texttt{t\_ij}. 
+\paragraph*{Exercise 1} Your first task is to implement the calculation of the link travel time $t_{ij}(x_{ij})$ using the BPR function of equation \eqref{bpr}. Assume that the values of $x_{ij}$, $\tff$, $C_{ij}$, $\alpha_{ij}$, and $\beta_{ij}$ are already given. 
+
+Within the \texttt{Link} class in Link.java, find the method \texttt{getTravelTime()}. It defines a \texttt{double} \texttt{t\_{ij}} and sets the value to 0. You need to calculate the correct value of $t_{ij}(x_{ij})$ and assign it to variable \texttt{t\_ij}. 
 	
 	\begin{center}
 		\includegraphics[width=0.3\textwidth]{netbeans3.png}
 	\end{center}
 
-\noindent Open Main.java and ensure that it will run \texttt{Exercise1.main(args);}.
+\noindent Open Main.java and ensure that it will run \texttt{Exercise1.test();}.
 Open Exercise1.java. The \texttt{main()} method constructs two instances of the \texttt{Link} class with different parameters. The first link has $t^{\mathrm{ff}}_{1}=10$, $C_{1}=2580$, $\alpha_{1}=0.15$, and $\beta_{1}=4$. The second link $t^{\mathrm{ff}}_{2}=12$, $C_{2}=1900$, $\alpha_{2}=0.35$, and $\beta_{2}=2$. The \texttt{main()} method then prints the calculation of $t_{ij}$ with $x_{1}=1230.2$, $x_2=570$, $x_1=0$, and $x_2=2512$. You should compare the values calculated by your code with values that you have computed by hand. 
-Afterwards, \texttt{main} calls the \texttt{autograde()} method, which runs an automated test of your answers. 
+Afterwards, \texttt{test()} calls the \texttt{autograde()} method, which runs an automated test of your answers. 
 	
 	
 	\begin{center}
@@ -162,7 +168,13 @@ Here is the expected output if the method is implemented correctly:
 	
 Read the tutorials on \href{https://www.w3schools.com/java/java_methods.asp}{defining methods} and \href{https://www.w3schools.com/java/java_methods_param.asp}{method parameters}.  When working with methods, it is important to be aware of the \href{https://www.w3schools.com/java/java_scope.asp}{scope of variables}. 
 	
-\paragraph*{Exercise 2(a)} Open Link.java. Implement the \texttt{getFlow()} and \texttt{getCapacity()} methods. \textit{Hint:} the link flow is $x_{ij}$ and the link capacity is $C_{ij}$. You already have variables for these values. It is good programming practice to separate the variables from other parts of the code through accessor methods. 
+\paragraph*{Exercise 2(a)} Open Link.java. 
+Implement the following:
+\begin{itemize}
+	\item \texttt{getFlow()} method: returns the flow of the link
+	
+	\item \texttt{getCapacity()} method: returns the capacity of the link
+\end{itemize}\textit{Hint:} the link flow is $x_{ij}$ and the link capacity is $C_{ij}$. You already have variables for these values. It is good programming practice to separate the variables from other parts of the code through accessor methods. 
 
 \vspace{\baselineskip}
 
@@ -171,7 +183,7 @@ Read the tutorials on \href{https://www.w3schools.com/java/java_booleans.asp}{bo
 
 Now we need to introduce the first data structure, arrays. An array is simply an ordered list of elements with a fixed size. Read the \href{https://www.w3schools.com/java/java_arrays.asp}{tutorial on arrays}. When working with arrays, it is helpful to use loops. Read the tutorials on \href{https://www.w3schools.com/java/java_while_loop.asp}{\texttt{while} loops}, \href{https://docs.oracle.com/javase/tutorial/java/nutsandbolts/while.html}{\texttt{for} loops}, and \href{https://www.w3schools.com/java/java_break.asp}{loop control}.
 
-\paragraph*{Exercise 2(b)} Open Exercise2.java. Your task is to implement the \texttt{findCongestedLinks()} method, which prints some information about each link.  The array of links is passed as a method parameter. For each link in the array, first print ``link'' and the link number, i.e. ``1'', ``2'', etc. Then print the link travel time, and finally print ``yes'' if $x_{ij}/C_{ij} >1$, or ``no'' if $x_{ij}/C_{ij} \leq 1$. Use \texttt{System.out.print()} and \texttt{System.out.println()} to print to the console.
+\paragraph*{Exercise 2(b)} Open Exercise2.java. Your task is to implement the \texttt{findCongestedLinks()} method in Exercise2.java, which prints some information about each link.  The array of links is passed as a method parameter. For each link in the array, first print ``link'' and the index of the link starting at 1, i.e. ``1'', ``2'', etc. Then print the link travel time, and finally print ``yes'' if $x_{ij}/C_{ij} >1$, or ``no'' if $x_{ij}/C_{ij} \leq 1$. Use \texttt{System.out.print()} and \texttt{System.out.println()} to print to the console.
 	Your output should look something like this:
 	\begin{align*}
 		& \texttt{link 1 10.171386840006189 yes} \\
@@ -194,21 +206,29 @@ When a new instance of a class is created, the constructor method is automatical
  
  
  \paragraph*{Exercise 3(a)} Open Node.java. You will notice that a \texttt{Node} class has already been created for you.
- Open Link.java. Implement the \texttt{getStart()} and \texttt{getEnd()} methods of the \texttt{Link} class, which return the start and end nodes. In terms of the model, link $(i,j)$ has start node $i$ and end node $j$. These are already stored as instance variables in the \texttt{Link} class. 
  
- \vspace{\baselineskip}
+ Open Link.java. 
+  \begin{itemize}
+ 	\item \texttt{getStart()} method: returns the start node of the link.
+ 	\item  \texttt{getEnd()} method: returns the end node of the link.
+ \end{itemize} 
+ In terms of the model, link $(i,j)$ has start node $i$ and end node $j$. These are already stored as instance variables in the \texttt{Link} class. 
+ 
 
-\noindent
 Open Link.java. You will notice that the first method is a constructor which stores the passed link parameters \texttt{start}, \texttt{end}, \texttt{t\_ff}, \texttt{C}, \texttt{alpha}, and \texttt{beta} in the instance variables. 
 
-\paragraph*{Exercise 3(b)} Implement the method \texttt{getId()} of the \texttt{Node} class. 
+\paragraph*{Exercise 3(b)} Open Node.java. Implement the method \texttt{getId()} of the \texttt{Node} class. 
 The id is passed as a parameter into the constructor for the \texttt{Node class}. The constructor parameter is a single \texttt{int} representing the id of the node. Therefore, the constructor looks like \texttt{public Node(int id)}. 
 Also implement the constructor for the \texttt{Node} class. To do so, you may need to add instance variables to the \texttt{Node} class.
 
 
 \paragraph*{Exercise 3(c)}
 Text is represented as \texttt{String}s in Java. Read the tutorial on \href{https://www.w3schools.com/java/java_strings.asp}{\texttt{String}s}. 
-When you print an instance of a class, it will by default call the \texttt{toString()} method of that class. Unless you implement it, the output will be a memory reference that is usually not useful. Implement the \texttt{toString()} methods of the \texttt{Node} class to return the id of the node. Also implement the \texttt{toString()} method of the \texttt{Link} class to return ``($i$, $j$)'' where $i$ and $j$ are the ids of the start and end nodes. For instance, a link from node 1 to node 2 should have a \texttt{toString()} output of ``\texttt{(1, 2)}''. 
+When you print an instance of a class, it will by default call the \texttt{toString()} method of that class. Unless you implement it, the output will be a memory reference that is usually not useful.
+\begin{itemize}
+	\item  Implement the \texttt{toString()} methods of the \texttt{Node} class to return a string containing the id of the node.
+	\item Implement the \texttt{toString()} method of the \texttt{Link} class to return the string ``($i$, $j$)'' where $i$ and $j$ are the ids of the start and end nodes. For instance, a link from node 1 to node 2 should have a \texttt{toString()} output of ``\texttt{(1, 2)}''. 
+\end{itemize} 
 % 
 
  \vspace{\baselineskip}
@@ -216,12 +236,19 @@ When you print an instance of a class, it will by default call the \texttt{toStr
 \noindent
 It is now helpful for us to learn about dynamic arrays. Read the tutorial on the \href{https://www.w3schools.com/java/java_arraylist.asp}{Java \texttt{ArrayList} library}. Later on, we will need to obtain $\Gamma^+_i$: the set of links starting at $i$. This is defined as the \texttt{getOutgoing()} method of the \texttt{Node} class, which returns an \texttt{ArrayList} of all outgoing \texttt{Link}s.
 
-\paragraph*{Exercise 3(d)} Implement the \texttt{getOutgoing()} method of the \texttt{Node} class. \textit{Hint:} you will need to create a new instance variable \texttt{ArrayList} in the \texttt{Node} class to store $\Gamma^+_i$. You will need to instantiate this new \texttt{ArrayList} --- do so in the constructor of the \texttt{Node} class.
-Create a new method in the \texttt{Node} class to add \texttt{Link}s to this \texttt{ArrayList}. Then call this method in the constructor of the \texttt{Link} class. The keyword \href{https://www.w3schools.com/java/ref_keyword_this.asp}{\texttt{this}}, which refers to the current instance of a class, is useful here. 
+\paragraph*{Exercise 3(d)} 
+\begin{itemize}
+	\item Open Node.java. Implement the \texttt{getOutgoing()} method of the \texttt{Node} class.
+	It returns an \texttt{ArrayList} of links that are outgoing from the given node. For node $i$, the list of outgoing links contains all links $(i, j)$ that start at $i$.
+	
+	 \textit{Hint:} you will need to create a new instance variable \texttt{ArrayList} in the \texttt{Node} class to store $\Gamma^+_i$. You will need to instantiate this new \texttt{ArrayList} --- do so in the constructor of the \texttt{Node} class.
+	 
+	 \item Create a new method in the \texttt{Node} class to add \texttt{Link}s to this \texttt{ArrayList}. Then call this method in the constructor of the \texttt{Link} class so that every time a \texttt{Link} from $i$ to $j$ is created, it is added to the list of outgoing links of $i$.
+	 
+	 The keyword \href{https://www.w3schools.com/java/ref_keyword_this.asp}{\texttt{this}}, which refers to the current instance of a class, is useful here. 
+\end{itemize}
 
- \vspace{\baselineskip}
 
-\noindent
 After completing Exercises 3(a)--3(d), your code should pass the \texttt{autograde()} method of Exercise3.java. 
 
 
@@ -233,19 +260,35 @@ After completing Exercises 3(a)--3(d), your code should pass the \texttt{autogra
 
 Our next step is to create a representation of the demand $d_{rs}$. To do so, we will create a new \texttt{Zone} class that is a special type of \texttt{Node}: the \texttt{Zone} $r$ stores the demand $d_{rs}$. Read the tutorials on \href{https://www.w3schools.com/java/java_inheritance.asp}{inheritance} and \href{https://www.w3schools.com/java/java_polymorphism.asp}{polymorphism}. Open Zone.java. 
 The \texttt{Zone} class extends the \texttt{Node} class. 
+
+
 For the next exercise, we will be implementing the \texttt{getDemand(Node)} method of the \texttt{Zone} class, which returns the demand $d_{rs}$ from node $r$ (the \texttt{Zone} being referenced) to a destination node. 
-Demand is added via the \texttt{addDemand(Node, double)} method. 
+
+
+When we read the file, we will store demand in the \texttt{Zone} instance for $r$ by calling the \texttt{addDemand(Node, double)} method to add demand from $r$ to $s$.
 To assist in this implementation, learn about \href{https://www.w3schools.com/java/java_hashmap.asp}{\texttt{HashMap}s}. The \texttt{hashCode} method, which is needed to use \texttt{Node}s as a key for \texttt{HashMap}s, has already been implemented for you.  
 	
 	
 \paragraph*{Exercise 4(a)} Open Zone.java. Implement the constructor of the \texttt{Zone} class. You can call methods of the parent class using the \href{https://www.w3schools.com/java/ref_keyword_super.asp}{\texttt{super}} keyword.
 
-\paragraph*{Exercise 4(b)} Implement the \texttt{addDemand(Node, double)} method of the \texttt{Zone} class. This method must store the demand added for later reference by the \texttt{getDemand(Node)} method. Implement the \texttt{getDemand(Node)} method. \textit{Hint: } Create a \texttt{HashMap} instance variable in the \texttt{Zone} class to store demand. Instantiate this \texttt{HashMap} in the constructor of the \texttt{Zone} class. 
+\paragraph*{Exercise 4(b)} 
+\begin{itemize}
+\item Implement the \texttt{addDemand(Node, double)} method of the \texttt{Zone} class. This method is called on zone $r$ to increase $d_{rs}$ for a parameter $s$. It must store the demand added for later reference by the \texttt{getDemand(Node)} method.
+
+ \item Implement the \texttt{getDemand(Node)} method. \textit{Hint: } Create a \texttt{HashMap} instance variable in the \texttt{Zone} class to store demand. Instantiate this \texttt{HashMap} in the constructor of the \texttt{Zone} class. 
+\end{itemize}
 
 \paragraph*{Exercise 4(c)} The productions of a zone $P_r$ is defined as $P_r=\sum\limits_{s\in\Z}d_{rs}$. Implement the \texttt{getProductions()} method of the \texttt{Zone} class. \textit{Hint:} Iterate through all stored demand.
 
 
-\paragraph*{Exercise 4(d)} Some zones are not through nodes, meaning that they can be used as destinations but not as intermediate nodes for travel. The \texttt{boolean} method \texttt{isThruNode()} of class \texttt{Node} indicates whether a \texttt{Node} is a through node. In the \texttt{Node} class, the method always returns \texttt{true}. Some \texttt{Zone}s may return \texttt{false}. Read the tutorial on \href{https://www.w3schools.com/java/java_methods_overloading.asp}{method overloading}. Implement methods \texttt{setThruNode(boolean)} and \texttt{isThruNode()} of the \texttt{Zone} class. \texttt{Zone}s are through nodes by default, but that parameter can be changed by calling \texttt{setThruNode(false)}.
+\paragraph*{Exercise 4(d)} Some zones are not through nodes, meaning that they can be used as destinations but not as intermediate nodes for travel. The \texttt{boolean} method \texttt{isThruNode()} of class \texttt{Node} indicates whether a \texttt{Node} is a through node. 
+
+In the \texttt{Node} class, the method always returns \texttt{true}. Some \texttt{Zone}s may not be a through node, meaning that the method should return \texttt{false} for them. In a later exercise, we will identify which nodes are through nodes.
+
+Read the tutorial on \href{https://www.w3schools.com/java/java_methods_overloading.asp}{method overloading}. \begin{itemize}
+	\item Open Zone.java. Implement the \texttt{setThruNode()} method: it takes a boolean parameter indicating whether this zone is a through node. You will need to store it in an instance variable to implement the next function.
+	\item Implement the \texttt{isThruNode()} method. It returns a boolean indicating whether the zone is a through node.
+\end{itemize}
 
 
 
@@ -264,9 +307,9 @@ After completing Exercises 4(a)--4(d), your code should pass the \texttt{autogra
 \label{sec33}
 
 
-Open Network.java. It contains the \texttt{Network} class, which has been partially implemented for you. There are instance variable arrays of \texttt{Node}s, \texttt{Link}s, and \texttt{Zone}s, which represent the sets $\N$, $\A$, and $\Z$ of the network. There are also accessor methods for each of these arrays. These arrays need to be instantiated to the correct size. 
+Open Network.java. It contains the \texttt{Network} class, which represents $\mathcal{G}$ in the network definition $\mathcal{G}=(\N, \A)$. Therefore, it stores the nodes and links of the network, and includes some functions for network calculations.There are instance variable arrays of \texttt{Node}s, \texttt{Link}s, and \texttt{Zone}s, which represent the sets $\N$, $\A$, and $\Z$ of the network. There are also accessor methods for each of these arrays. These arrays need to be instantiated to the correct size. 
 
-The next step is to populate these sets with network data. Thus far, we have been creating specific instances of \texttt{Node}s and \texttt{Link}s in the Exercise.java files. To keep our code general, we want to keep the problem-specific data in data files rather than in the code. Fortunately, data for many networks is available on \href{https://github.com/bstabler/TransportationNetworks}{Ben Stabler's Github account}. 
+The next step is to populate these sets with network data. Thus far, we have been creating specific instances of \texttt{Node}s and \texttt{Link}s in the Exercise.java files. To keep our code more general, we want to keep the problem-specific data in data files rather than in the code. Fortunately, data for many networks is available on \href{https://github.com/bstabler/TransportationNetworks}{Ben Stabler's Github account}. 
 
 
 Before we discuss the data format, we need to learn how to read from a file. Read the tutorial on  \href{https://www.w3schools.com/java/java_user_input.asp}{the \texttt{Scanner} class}, which is an effective way of reading different data from a file in text format. We need to direct the \texttt{Scanner} to use a file as an input source. Read the tutorials on the \href{https://www.w3schools.com/java/java_files.asp}{\texttt{File} class} and \href{https://www.w3schools.com/java/java_files_read.asp}{reading from a file}. 
@@ -280,19 +323,28 @@ The first file, ``net.txt'', defines the links and their characteristics. An exa
 \end{center}
 
 
-\noindent The first section contains the metadata, which specifies the size of the sets $\N$, $\A$, and $\Z$. This section is ended by the line \texttt{<END OF METADATA>}. Nodes are labeled by the numbers $1\ldots \vert\N\vert$ where $\vert\N\vert$ is specified in the metadata. 
+\noindent The first section contains the metadata, which specifies the size of the sets $\N$, $\A$, and $\Z$. This section is ended by the line ``<END OF METADATA>''. Nodes are labeled by the numbers $1\ldots \vert\N\vert$ where $\vert\N\vert$ is specified in the metadata. 
 
 
 
 
-\paragraph*{Exercise 5(a)} Read the metadata to instantiate the instance variables \texttt{nodes}, \texttt{links}, and \texttt{zones} of the \texttt{Network} class with the correct size. \textit{Hint:} loop until the line \texttt{<END OF METADATA>} is reached. If an intermediate line contains the text \texttt{<NUMBER OF NODES>}, then use that number to instantiate the \texttt{nodes} array. Repeat for the \texttt{links} and \texttt{zones}. The \href{https://www.w3schools.com/java/java_ref_string.asp}{\texttt{String} methods} \texttt{substring()}, \texttt{indexOf()}, and \texttt{trim()} are useful here. Use the method \texttt{Integer.parseInt(String)} to convert a \texttt{String} representing a number into an \texttt{int}. The equivalent method for \texttt{double}s is \texttt{Double.parseDouble(String)}.
+\paragraph*{Exercise 5(a)} Open Network.java. Add code in the \texttt{readNetwork()} method to Read the metadata to instantiate the instance variables \texttt{nodes}, \texttt{links}, and \texttt{zones} of the \texttt{Network} class with the correct size. \textit{Hint:} loop until the line \texttt{<END OF METADATA>} is reached. If an intermediate line contains the text \texttt{<NUMBER OF NODES>}, then use that number to instantiate the \texttt{nodes} array. Repeat for the \texttt{links} and \texttt{zones}. The \href{https://www.w3schools.com/java/java_ref_string.asp}{\texttt{String} methods} \texttt{substring()}, \texttt{indexOf()}, and \texttt{trim()} are useful here. Use the method \texttt{Integer.parseInt(String)} to convert a \texttt{String} representing a number into an \texttt{int}. The equivalent method for \texttt{double}s is \texttt{Double.parseDouble(String)}.
 
 \vspace{\baselineskip}
 
-\paragraph*{Exercise 5(b)} \noindent Zones are labeled $1$ through $\vert \Z \vert$. Construct these in the  \texttt{readNetwork(File)} method of the \texttt{Network} class and store them in the array \texttt{zones}. \textit{Hint:} the number of nodes in the metadata specifies the number of zones to construct.
-Nodes are labeled $1$ through $\vert \N \vert$. You can similarly construct them now, but notice that the first $\vert \Z \vert$ nodes are also zones. Do not construct new instances of \texttt{Node} for these zones; use the instance of \texttt{Zone} that already exists. 
+\paragraph*{Exercise 5(b)}  \begin{itemize}
+	\item Open Network.java. Zones are labeled $1$ through $\vert \Z \vert$. Populate the instance variable list \texttt{zones} in the \texttt{Network} class by constructing a new instance of \texttt{Zone} in the  \texttt{readNetwork()} method and store them in the array \texttt{zones}.
+	
+	\textit{Hint:} the number of nodes in the metadata specifies the number of zones to construct.
+	
+	\item Populate the instance variable list \texttt{nodes}  in the \texttt{Network} class Nodes are labeled $1$ through $\vert \N \vert$, which includes some nodes that are also zones. Construct new nodes in the  \texttt{readNetwork()} method and add them to the array \texttt{nodes}.
+	
+	Do not construct new instances of \texttt{Node} for  zones that you already constructed. Use the instance of \texttt{Zone} that already exists in the array \texttt{zones}. 
+\end{itemize} 
 
-\paragraph*{Exercise 5(c)} After the header line, each line of data contains the parameters for one link in a specific order: start node, end node, capacity, length, free flow time, $\alpha_{ij}$, $\beta_{ij}$, speed limit, toll, and type. ``B'' refers to $\alpha_{ij}$ and ``power'' refers to $\beta_{ij}$. Some of these are not used in this tutorial. In the \texttt{readNetwork()} method of the \texttt{Network} class, read the data using \texttt{Scanner} methods to construct a \texttt{Link} instance for each link, and store it in the array \texttt{links}. \textit{Hint:} the number of links in the metadata specifies the number of lines of data. 
+\paragraph*{Exercise 5(c)} After the header line, each line of data contains the parameters for one link in a specific order: start node, end node, capacity, length, free flow time, $\alpha_{ij}$, $\beta_{ij}$, speed limit, toll, and type. ``B'' refers to $\alpha_{ij}$ and ``power'' refers to $\beta_{ij}$. Some of these are not used in this tutorial. 
+
+In the \texttt{readNetwork()} method of the \texttt{Network} class, read the data using \texttt{Scanner} methods to construct a \texttt{Link} instance for each link, and store it in the array \texttt{links}. \textit{Hint:} the number of links in the metadata specifies the number of lines of data. 
 
 
 \vspace{\baselineskip}
@@ -304,10 +356,16 @@ The second file is ``trips.txt''. The metadata here can be ignored. For each zon
 	\includegraphics[width=\textwidth]{netbeans7.png}
 \end{center}
 
-\paragraph*{Exercise 5(d)} In the \texttt{readTrips(File)} method, read the origin-destination trip matrix, and store it in the \texttt{Zone} instances using the \texttt{addDemand(Node, double)} method of class \texttt{Zone}. \textit{Hint:} Scan to the end of the metadata using a \texttt{while} loop until you reach the text \texttt{<END OF METADATA>}. Scan for origins the \texttt{Origin} keyword. Then scan for destinations as integers until you reach the next \texttt{Origin} keyword. Use \texttt{Scanner.next()} instead of looking for new lines. 
+\paragraph*{Exercise 5(d)} In the \texttt{readTrips(File)} method, read the origin-destination trip matrix, and store it in the \texttt{Zone} instances using the \texttt{addDemand(Node, double)} method of class \texttt{Zone}. \textit{Hint:} Scan to the end of the metadata using a \texttt{while} loop until you reach the text \texttt{<END OF METADATA>}. Scan for origins denoted by the \texttt{Origin} keyword. Then scan for destinations as integers until you reach the next \texttt{Origin} keyword. Use \texttt{Scanner.next()} instead of looking for new lines. 
 
 
-\paragraph*{Exercise 5(e)} For testing or data analysis, you may find it helpful to find the \texttt{Node} associated with a given id, or the \texttt{Link} between two \texttt{Node}s. Implement the \texttt{findNode(int)} and \texttt{findLink(Node, Node)} methods of the \texttt{Network} class. \textit{Hint:} You have an array of all \texttt{Node}s available in the \texttt{Network} class, and a list of all outgoing links from a given \texttt{Node}. 
+\paragraph*{Exercise 5(e)} For testing or data analysis, you may find it helpful to find the \texttt{Node} associated with a given id, or the \texttt{Link} between two \texttt{Node}s. 
+\begin{itemize}
+	\item Open Network.java. Implement the \texttt{findNode(int)} method, which returns the node with the given id, or \texttt{null} if none exists.
+	
+	\item Implement the \texttt{findLink(Node, Node)} method, which returns the link between the 2 given nodes, or \texttt{null} if none exists.
+\end{itemize}
+\textit{Hint:} You have an array of all \texttt{Node}s available in the \texttt{Network} class, and a list of all outgoing links from a given \texttt{Node}. 
 
 
  \vspace{\baselineskip}
@@ -369,11 +427,23 @@ Next, we enter the main loop in line \ref{line8}. This loop continues while $Q$ 
 
 
 We will start our implementation of Dijkstra's by implementing a data structure to store a path. 
-A \texttt{Path} is an ordered list of \texttt{Link}s. To provide practice with abstraction, I have defined a \texttt{Path} class in Path.java. A \texttt{Path} extends an \texttt{ArrayList<Link>}, which \href{https://www.w3schools.com/java/java_inheritance.asp}{inherits} the \texttt{get()}, \texttt{size()}, and \texttt{add()} methods of \texttt{ArrayList}. In addition, \texttt{Path} defines five additional methods. \texttt{isConnected()} checks whether the list of links is a valid path. For instance, the list \texttt{[(1,3), (3, 7), (7, 8)]} is a connected path, but the list \texttt{[(1,3), (2, 4), (4, 8)]} is not. \texttt{getSource()} and \texttt{getDest()} return the start and end nodes of the path.
-\texttt{getTravelTime()} calculates $T^\pi$. The last method, \texttt{addHstar(double)}, will be used later.
+A \texttt{Path} is an ordered list of \texttt{Link}s. To provide practice with abstraction, I have defined a \texttt{Path} class in Path.java. A \texttt{Path} extends an \texttt{ArrayList<Link>}, which \href{https://www.w3schools.com/java/java_inheritance.asp}{inherits} the \texttt{get()}, \texttt{size()}, and \texttt{add()} methods of \texttt{ArrayList}. In addition, \texttt{Path} defines five additional methods:
+\begin{itemize}
+	\item \texttt{isConnected()} checks whether the list of links is a valid path. For instance, the list \texttt{[(1,3), (3, 7), (7, 8)]} is a connected path, but the list \texttt{[(1,3), (2, 4), (4, 8)]} is not.
+	\item  \texttt{getSource()} and \texttt{getDest()} return the origin and destination nodes of the path, respectively.
+	\item \texttt{getTravelTime()} calculates $T^\pi$.
+	\item \texttt{addHstar(double)} will be used later.
+\end{itemize}
 
-
-\paragraph*{Exercise 6(a)} Open Path.java. Implement the \texttt{getSource()}, \texttt{getDest()}, \texttt{isConnected()}, and \texttt{getTravelTime()}  methods of the \texttt{Path} class.
+\paragraph*{Exercise 6(a)} \begin{itemize}
+	\item Open Path.java. Implement the \texttt{getSource()} method: return the starting node of the path.
+	
+	\textit{Hint.} You have a list of all links in the path.
+	
+	\item Implement the \texttt{getDest()} method: return the last node of the path.
+	\item Implement the \texttt{isConnected()} method, which checks whether the list of links is a connected path.
+	\item Implement the \texttt{getTravelTime()} method, which returns $T^\pi = \sum_{(i,j)\in\pi} t_{ij}(x_{ij})$.
+\end{itemize}
 
 
 \vspace{\baselineskip}
@@ -393,7 +463,7 @@ It may be convenient to use a \href{https://www.w3schools.com/java/java_hashset.
 \vspace{\baselineskip}
 
 \noindent
-After executing Dijkstra's algorithm, we now have all the information needed to find the shortest path from $r$ to $s$ through the predecessor labels. We need to convert those predecessor labels into an instance of the \texttt{Path} class created earlier. This can be accomplished through the trace algorithmic shown below. Essentially, start at $s$, and follow the predecessor labels until reaching $r$, adding each link to the path as you go. 
+After executing Dijkstra's algorithm, we now have all the information needed to find the shortest path from $r$ to $s$ through the predecessor labels. We need to convert those predecessor labels into an instance of the \texttt{Path} class created earlier. This can be accomplished through the trace algorithm shown below. Essentially, start at $s$, and follow the predecessor labels until reaching $r$, adding each link to the path as you go. 
 
 \vspace{\baselineskip}
 
@@ -405,7 +475,7 @@ After executing Dijkstra's algorithm, we now have all the information needed to 
 	\vspace{0.5\baselineskip}
 	
 	\While{$n\neq r$}
-	\State $\pi\leftarrow \pi \cup (p_n,n)$
+	\State $\pi\leftarrow \pi \cup \{(p_n,n)\}$
 	\State $n\leftarrow p_n$
 	\EndWhile
 	\EndProcedure
@@ -432,7 +502,13 @@ Before implementing the method of successive averages, there are some network st
 	AEC &= \frac{TSTT- SPTT}{\sum\limits_{(r,s)\in\Z^2} d_{rs}}
 \end{align}
 
-\paragraph*{Exercise 7} Implement the \texttt{getTSTT()}, \texttt{getSPTT()}, \texttt{getTotalTrips()}, and \texttt{getAEC()} methods of the \texttt{Network} class. After completing them, your code should pass the \texttt{autograde()} method of Exercise7.java. 
+\paragraph*{Exercise 7} 
+\begin{itemize}
+	\item Open Network.java. Implement the \texttt{getTSTT()} method: return the total system travel time.
+	\item Implement the \texttt{getSPTT()} method: return the total system travel time if all demand is on the shortest path. 
+	
+	\item Implement the \texttt{getAEC()} method: return the average excess cost. 
+\end{itemize}
 
 
 
@@ -486,18 +562,30 @@ The algorithm is specified below in pseudocode:
 
 % x star variable, addxstar method, and addFlow() method
 
-\paragraph*{Exercise 8(a)} In the \texttt{Link} class, implement the \texttt{addXstar(double)} method which is used to implement line \ref{msa11}. 
-The $x^\star_{ij}$ value will need to be stored in a new instance variable in the \texttt{Link} class.
-In the \texttt{Path} class, implement the \texttt{addHstar(double)} which adds the specified flow to the $x^\star_{ij}$ variable of every link in the path.
+\paragraph*{Exercise 8(a)} 
+\begin{itemize}
+	\item Open Link.java. Create a new instance variable to store $x^\star_{ij}$ in the \texttt{Link} class.
+	\item In the \texttt{Link} class, implement the \texttt{addXstar(double)} method which adds the specified flow to the $x^\star_{ij}$ variable.
+	It will be used to implement line \ref{msa11}. 
+	
+	\item In the \texttt{Path} class, implement the \texttt{addHstar(double)} method which adds the specified flow to the $x^\star_{ij}$ variable of every link in the path. Use the \texttt{addXstar()} method of the \texttt{Link} class in your implementation.
+\end{itemize}
 
 
 
-\paragraph*{Exercise 8(b)} In the \texttt{Network} class, implement the \texttt{calculateStepsize(int)} method, which determines the value of $\lambda$ in line \ref{msa15}. Using this $\lambda$, in the \texttt{Link} class implement the \texttt{calculateNewX(double)} method, which takes as input $\lambda$ and implements lines \ref{msa17} and \ref{msa18}. 
-Finally, implement the \texttt{calculateNewX(double)} method of the \texttt{Network} class, which implements the loop in line \ref{msa16}. 
+
+\paragraph*{Exercise 8(b)} 
+\begin{itemize}
+	\item Open Network.java. In the \texttt{Network} class, implement the \texttt{calculateStepsize(int)} method, which determines the value of $\lambda$ in line \ref{msa15}. 
+	
+	\item Open Link.java. Using this $\lambda$, in the \texttt{Link} class implement the \texttt{calculateNewX(double)} method, which takes as input $\lambda$ and implements lines \ref{msa17} and \ref{msa18}. 
+	
+	\item Open Network.java again, and implement the \texttt{calculateNewX(double)} method of the \texttt{Network} class, which implements the loop in line \ref{msa16}. 
+\end{itemize}
 
 
 
-\paragraph*{Exercise 8(c)} Implement the \texttt{calculateAON()} method in the \texttt{Network} class, which implements the loop in lines \ref{msa6}--\ref{msa14}. 
+\paragraph*{Exercise 8(c)} Open Network.java. Implement the \texttt{calculateAON()} method in the \texttt{Network} class, which is the loop in lines \ref{msa6}--\ref{msa14}. 
 
 \paragraph*{Exercise 8(d)} In the method \texttt{msa(int)} of the \texttt{Network} class, implement the main loop (line \ref{msa5} of the method of successive averages. Most of the work is already done through the previous exercises. Each iteration, print out the iteration number and the average excess cost, as shown below:
 

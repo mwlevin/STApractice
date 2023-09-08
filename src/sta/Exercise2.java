@@ -18,7 +18,7 @@ import static sta.Exercise1.autograde;
  */
 public class Exercise2 
 {
-    public static void main(String[] args)
+    public static void test()
     {
         Link[] array = new Link[]{
             new Link(null, null, 10, 2580, 0.15, 4),

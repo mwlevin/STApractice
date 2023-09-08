@@ -11,7 +11,7 @@ package sta;
  */
 public class Exercise1 
 {
-    public static void main(String[] args)
+    public static void test()
     {
         Link link1 = new Link(null, null, 10, 2580, 0.15, 4);
         Link link2 = new Link(null, null, 12, 1900, 0.35, 2);

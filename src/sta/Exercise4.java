@@ -11,7 +11,7 @@ package sta;
  */
 public class Exercise4 
 {
-    public static void main(String[] args)
+    public static void test()
     {
         
         Zone n1 = new Zone(1);

@@ -11,7 +11,7 @@ package sta;
  */
 public class Exercise3 
 {
-    public static void main(String[] args)
+    public static void test()
     {
         Node n1 = new Node(1);
         Node n2 = new Node(2);

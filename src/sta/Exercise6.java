@@ -11,7 +11,7 @@ package sta;
  */
 public class Exercise6 
 {
-    public static void main(String[] args)
+    public static void test()
     {
         
         Network network = new Network("SiouxFalls");
@@ -226,7 +226,7 @@ public class Exercise6
         
         auto.test(path2.isConnected() == false);
         
-        auto.flush("Link.isConnected()");
+        auto.flush("Path.isConnected()");
         
 
         if(path.size() > 0)
@@ -258,7 +258,7 @@ public class Exercise6
         auto.test(Math.abs(path2.getTravelTime() - 21.050172255908606) < 0.01);    
         
         
-        auto.flush("Link.getTravelTime()");
+        auto.flush("Path.getTravelTime()");
         
         
         for(Node n : nodes)

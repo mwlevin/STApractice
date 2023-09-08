@@ -11,7 +11,7 @@ package sta;
  */
 public class Exercise7 
 {
-    public static void main(String[] args)
+    public static void test()
     {
         Network network = new Network("SiouxFalls");
                 

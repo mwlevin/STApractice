@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
-import static sta.Exercise2.findCongestedLinks;
 
 /**
  *
@@ -18,7 +17,7 @@ import static sta.Exercise2.findCongestedLinks;
  */
 public class Exercise8 
 {
-    public static void main(String[] args)
+    public static void test()
     {
         Network network = new Network("SiouxFalls");
                 
